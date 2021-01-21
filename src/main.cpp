@@ -96,8 +96,17 @@ int main(int, char**) {
             << static_cast<int>(version.patch) << std::endl;
 
   // Create window
+  SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_EGL, 1);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+
+  // Explicitly set channel depths, otherwise we might get some < 8
+  SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+  SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+  SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+  SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
   auto windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
   auto window = SDL_CreateWindow("Test", SDL_WINDOWPOS_CENTERED,
@@ -118,7 +127,7 @@ void main()
   constexpr char kFS[] = R"(precision mediump float;
 void main()
 {
-    gl_FragColor = vec4(gl_FragCoord.x / 512.0, gl_FragCoord.y / 512.0, 0.0, 1.0);
+    gl_FragColor = vec4(gl_FragCoord.x / 512.0, gl_FragCoord.y / 512.0, 0.0, 0.1);
 })";
 
   auto program = loadProgram(kVS, kFS);
