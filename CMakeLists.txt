@@ -16,10 +16,17 @@ if(WIN32)
     set(SDL2_LIBRARY
         "${PROJECT_SOURCE_DIR}/lib/win64/sdl2/SDL2.lib"
         "${PROJECT_SOURCE_DIR}/lib/win64/sdl2/SDL2main.lib")
-else()
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  if (${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "arm64")
+    set(EGL_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos-arm64/angle/libEGL.dylib")
+    set(GLESV2_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos-arm64/angle/libGLESv2.dylib")
+  else()
     set(EGL_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos/angle/libEGL.dylib")
     set(GLESV2_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos/angle/libGLESv2.dylib")
     find_package(SDL2 REQUIRED)
+  endif()
 endif()
 
 # Executable
