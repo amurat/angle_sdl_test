@@ -54,4 +54,9 @@ if(WIN32)
         "${PROJECT_SOURCE_DIR}/lib/win64/angle/libGLESv2.dll"
         "${PROJECT_SOURCE_DIR}/lib/win64/sdl2/SDL2.dll"
         $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+else()
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${EGL_LIBRARY}"
+        "${GLESV2_LIBRARY}"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif()
