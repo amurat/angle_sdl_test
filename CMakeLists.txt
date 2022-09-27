@@ -5,6 +5,49 @@ project(angle_sdl_test)
 # Module path
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 
+set(sdl_PREFIX "${CMAKE_BINARY_DIR}/sdl")
+set(sdl_INSTALL_DIR "${CMAKE_BINARY_DIR}/sdl")
+set(sdl_DOWNLOAD_DIR "${CMAKE_BINARY_DIR}/sdl/download")
+set(sdl_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${sdl_INSTALL_DIR} -DSDL_SHARED=OFF)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    set(sdl_CMAKE_ARGS "${sdl_CMAKE_ARGS}" -DFORCE_STATIC_VCRT=ON -DHAVE_LIBC=ON)
+endif()
+set(sdl_URL https://www.libsdl.org/release/SDL2-2.0.12.zip)
+set(SDL_SHARED OFF CACHE BOOL "sdl shared")
+set(SDL_SHARED_ENABLED_BY_DEFAULT OFF CACHE BOOL "sdl share enabled by default")
+include(ExternalProject)
+ExternalProject_Add(SDL
+    PREFIX ${sdl_PREFIX}
+    URL ${sdl_URL}
+    INSTALL_DIR ${sdl_INSTALL_DIR}
+    CMAKE_ARGS ${sdl_CMAKE_ARGS}
+)
+
+include_directories(
+    ${CMAKE_BINARY_DIR}/sdl/include/SDL2
+)
+link_directories("${CMAKE_BINARY_DIR}/sdl/lib")
+
+set(OSX_FRAMEWORKS
+    Foundation
+    AppKit
+    ApplicationServices
+    CoreVideo
+    CoreAudio
+    AudioToolbox
+    AudioUnit
+    IOKit
+    ForceFeedback
+    Carbon
+    Metal
+)
+
+
+foreach(FW ${OSX_FRAMEWORKS})
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework ${FW}")
+endforeach()
+
+
 # Sources
 set(SOURCE_FILES src/main.cpp src/rendergles2.cpp src/rendergl2.cpp)
 
@@ -25,7 +68,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   else()
     set(EGL_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos/angle/libEGL.dylib")
     set(GLESV2_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos/angle/libGLESv2.dylib")
-    find_package(SDL2 REQUIRED)
+    #find_package(SDL2 REQUIRED)
   endif()
 endif()
 
@@ -46,9 +89,14 @@ target_link_libraries(${PROJECT_NAME}
   ${GLESV2_LIBRARY}
 )
 
-target_link_libraries(${PROJECT_NAME}
-  ${SDL2_LIBRARY}
-)
+#target_link_libraries(${PROJECT_NAME}
+#  ${SDL2_LIBRARY}
+#)
+
+target_link_libraries(${PROJECT_NAME} debug SDL2d optimized SDL2)
+target_link_libraries(${PROJECT_NAME} iconv)
+
+add_dependencies(${PROJECT_NAME} SDL)
 
 # Dynamic libraries
 if(WIN32)
