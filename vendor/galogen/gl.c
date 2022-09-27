@@ -27,14 +27,25 @@ void* GalogenGetProcAddress(const char *name) {
 
 #elif defined(__APPLE__)
 #include <dlfcn.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 static void* GalogenGetProcAddress (const char *name)
 {
   static void* lib = NULL;
+  char* default_path = "/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL";
+  char* path = getenv("GALOGEN_OPENGL_LIBRARY");
+  if (NULL == path) {
+    path = default_path;
+  }
+    
   if (NULL == lib)
     lib = dlopen(
-      "/System/Library/Frameworks/OpenGL.framework/Versions/Current/OpenGL",
+      path,
       RTLD_LAZY);
+  if (NULL == lib) {
+      printf("%s\n", dlerror());
+  }
   return lib ? dlsym(lib, name) : NULL;
 }
 #elif defined(__ANDROID__)
