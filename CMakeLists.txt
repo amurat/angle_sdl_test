@@ -49,7 +49,8 @@ endforeach()
 
 
 # Sources
-set(SOURCE_FILES src/main.cpp src/rendergles2.cpp src/rendergl2.cpp)
+set(SOURCE_FILES src/main.cpp src/rendergles2.cpp src/rendergl2.cpp
+    vendor/galogen/gl.c)
 
 # Dependencies
 if(WIN32)
@@ -82,6 +83,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   ${SDL2_INCLUDE_DIR}
   src/
   vendor/angle/include/
+  vendor/
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <SDL.h>
-#include "angle_gl.h"
+#include "galogen/gl.h"
 
 namespace {
 void printProgramLog(GLuint f_programId) {
@@ -92,7 +92,7 @@ void RunGL2Renderer(SDL_Window *window)
       gl_Position = vPosition;
   })";
 
-    constexpr char kFS[] = R"(precision mediump float;
+    constexpr char kFS[] = R"(
   void main()
   {
       gl_FragColor = vec4(gl_FragCoord.x / 512.0, gl_FragCoord.y / 512.0, 0.0, 0.1);
