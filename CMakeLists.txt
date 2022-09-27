@@ -6,7 +6,7 @@ project(angle_sdl_test)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
 
 # Sources
-set(SOURCE_FILES src/main.cpp)
+set(SOURCE_FILES src/main.cpp src/rendergles2.cpp src/rendergl2.cpp)
 
 # Dependencies
 if(WIN32)
@@ -44,6 +44,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 target_link_libraries(${PROJECT_NAME}
   ${EGL_LIBRARY}
   ${GLESV2_LIBRARY}
+)
+
+target_link_libraries(${PROJECT_NAME}
   ${SDL2_LIBRARY}
 )
 
