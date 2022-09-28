@@ -66,10 +66,11 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   if (${CMAKE_HOST_SYSTEM_PROCESSOR} MATCHES "arm64")
     set(EGL_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos-arm64/angle/libEGL.dylib")
     set(GLESV2_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos-arm64/angle/libGLESv2.dylib")
+    set(GL4ES_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos-arm64/gl4es/libGL.dylib")
   else()
     set(EGL_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos/angle/libEGL.dylib")
     set(GLESV2_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos/angle/libGLESv2.dylib")
-    #find_package(SDL2 REQUIRED)
+    set(GL4ES_LIBRARY "${PROJECT_SOURCE_DIR}/lib/macos/gl4es/libGL.dylib")
   endif()
 endif()
 
@@ -112,4 +113,8 @@ else()
         "${EGL_LIBRARY}"
         "${GLESV2_LIBRARY}"
         $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${GL4ES_LIBRARY}"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/libGL4ES.dylib)
+
 endif()
