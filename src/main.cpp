@@ -18,6 +18,8 @@ int main(int, char**) {
             << static_cast<int>(version.minor) << "."
             << static_cast<int>(version.patch) << std::endl;
 
+  setenv("GALOGEN_GL4ES_LIBRARY", "libGL4ES.dylib", 1);
+    
   // Create window
   const bool bInitGLES = true;
   const bool bRenderGLES = false;
