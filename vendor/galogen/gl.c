@@ -30,6 +30,20 @@ void* GalogenGetProcAddress(const char *name) {
 #include <stdlib.h>
 #include <stdio.h>
 
+static void* GLESGetProcAddress(const char *name)
+{
+    static void* lib = NULL;
+    char* path = "libGLESv2.dylib";
+    if (NULL == lib)
+      lib = dlopen(
+        path,
+        RTLD_LAZY);
+    if (NULL == lib) {
+        printf("%s\n", dlerror());
+    }
+    return lib ? dlsym(lib, name) : NULL;
+}
+
 static void* GalogenGetProcAddress (const char *name)
 {
   static void* lib = NULL;
@@ -46,7 +60,35 @@ static void* GalogenGetProcAddress (const char *name)
   if (NULL == lib) {
       printf("%s\n", dlerror());
   }
-  return lib ? dlsym(lib, name) : NULL;
+  void* (*gl4es_get_proc_address)(char*);
+  gl4es_get_proc_address = (void* (*)(char*))dlsym(lib, "gl4es_GetProcAddress");
+
+    static bool gl4es_inited = false;
+    if (!gl4es_inited) {
+        
+        void (*set_getprocaddress)(void*);
+        set_getprocaddress = (void (*)(void*))dlsym(lib, "set_getprocaddress");
+        set_getprocaddress(GLESGetProcAddress);
+        
+        void (*initialize_gl4es)(void);
+        initialize_gl4es = (void (*)(void))dlsym(lib, "initialize_gl4es");
+        initialize_gl4es();
+        gl4es_inited = true;
+    }
+    
+  char gl4es_name[255];
+  sprintf(gl4es_name, "%s", name);
+  void* func_ptr = gl4es_get_proc_address(gl4es_name);
+  return func_ptr;
+
+/*
+  void* func_ptr = lib ? dlsym(lib, gl4es_name) : NULL;
+  if (NULL == func_ptr) {
+    printf("%s\n", dlerror());
+  }
+  return func_ptr;
+*/
+  //return lib ? dlsym(lib, name) : NULL;
 }
 #elif defined(__ANDROID__)
 #include <dlfcn.h>

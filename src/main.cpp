@@ -19,9 +19,10 @@ int main(int, char**) {
             << static_cast<int>(version.patch) << std::endl;
 
   // Create window
-  const bool bUseGLES = false;
-    
-  if (bUseGLES) {
+  const bool bInitGLES = true;
+  const bool bRenderGLES = false;
+
+  if (bInitGLES) {
       SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
       SDL_GL_SetAttribute(SDL_GL_CONTEXT_EGL, 1);
       SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
@@ -46,7 +47,7 @@ int main(int, char**) {
   // Init GL
   auto glContext = SDL_GL_CreateContext(window);
   SDL_GL_MakeCurrent(window, glContext);
-  if (bUseGLES) {
+  if (bRenderGLES) {
     RunGLES2Renderer(window);
   } else {
     RunGL2Renderer(window);
