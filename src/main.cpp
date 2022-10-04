@@ -23,7 +23,8 @@ int main(int, char**) {
   // Create window
   const bool bInitGLES = true;
   const bool bRenderGLES = false;
-
+  const bool bInitSDLContext = true;
+    
   if (bInitGLES) {
       SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
       SDL_GL_SetAttribute(SDL_GL_CONTEXT_EGL, 1);
@@ -47,8 +48,11 @@ int main(int, char**) {
                                  SDL_WINDOWPOS_CENTERED, 512, 512, windowFlags);
 
   // Init GL
-  auto glContext = SDL_GL_CreateContext(window);
-  SDL_GL_MakeCurrent(window, glContext);
+    SDL_GLContext glContext = 0;
+    if (bInitSDLContext) {
+        glContext = SDL_GL_CreateContext(window);
+        SDL_GL_MakeCurrent(window, glContext);
+    }
   if (bRenderGLES) {
     RunGLES2Renderer(window);
   } else {
@@ -56,7 +60,10 @@ int main(int, char**) {
   }
 
     // Clean up
-  SDL_GL_DeleteContext(glContext);
+  if (bInitSDLContext) {
+    SDL_GL_DeleteContext(glContext);
+    glContext = 0;
+  }
   SDL_DestroyWindow(window);
   SDL_Quit();
   return EXIT_SUCCESS;

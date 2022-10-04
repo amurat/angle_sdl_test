@@ -29,8 +29,9 @@ void* GalogenGetProcAddress(const char *name) {
 #include <dlfcn.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
-static void* GLESGetProcAddress(const char *name)
+static void* GLESV2GetProcAddress(const char *name)
 {
     static void* lib = NULL;
     char* path = "libGLESv2.dylib";
@@ -42,6 +43,28 @@ static void* GLESGetProcAddress(const char *name)
         printf("%s\n", dlerror());
     }
     return lib ? dlsym(lib, name) : NULL;
+}
+
+static void* GLEGLGetProcAddress(const char *name)
+{
+    static void* lib = NULL;
+    char* path = "libEGL.dylib";
+    if (NULL == lib)
+      lib = dlopen(
+        path,
+        RTLD_LAZY);
+    if (NULL == lib) {
+        printf("%s\n", dlerror());
+    }
+    return lib ? dlsym(lib, name) : NULL;
+}
+
+static void* GLESGetProcAddress(const char *name)
+{
+    if (strncmp(name, "egl", 3) == 0) {
+        return GLEGLGetProcAddress(name);
+    }
+    return GLESV2GetProcAddress(name);
 }
 
 static void* GalogenGetProcAddress (const char *name)
