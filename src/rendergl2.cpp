@@ -80,8 +80,9 @@ GLuint loadProgram(const GLchar* f_vertSource_p, const GLchar* f_fragSource_p) {
 }
 }  // namespace
 
+static GLuint program;
 
-void RunGL2Renderer(SDL_Window *window)
+void SetupGL2Renderer()
 {
     std::cout << "GL version: " << glGetString(GL_VERSION) << std::endl;
 
@@ -98,40 +99,23 @@ void RunGL2Renderer(SDL_Window *window)
       gl_FragColor = vec4(gl_FragCoord.x / 512.0, gl_FragCoord.y / 512.0, 0.0, 0.1);
   })";
 
-    auto program = loadProgram(kVS, kFS);
-
-    // Main loop
-    bool isRunning = true;
-    while (isRunning) {
-      SDL_Event event;
-      while (0 != SDL_PollEvent(&event)) {
-        if (SDL_QUIT == event.type) {
-          isRunning = false;
-        } else if (SDL_KEYDOWN == event.type) {
-          const auto keyStates_p = SDL_GetKeyboardState(nullptr);
-          if (keyStates_p[SDL_SCANCODE_ESCAPE]) {
-            isRunning = false;
-          }
-        }
-      }
-
-      // Clear
-      glClearColor(0.2F, 0.2F, 0.2F, 1.F);
-      glClear(GL_COLOR_BUFFER_BIT);
-      glViewport(0, 0, 512, 512);
-
-      // Render scene
-      GLfloat vertices[] = {
-          0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
-      };
-      glUseProgram(program);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertices);
-      glEnableVertexAttribArray(0);
-      glDrawArrays(GL_TRIANGLES, 0, 3);
-
-      // Update window
-      SDL_GL_SwapWindow(window);
-    }
+    program = loadProgram(kVS, kFS);
 
 }
 
+void RenderGL2Renderer()
+{
+    // Clear
+    glClearColor(0.2F, 0.2F, 0.2F, 1.F);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, 512, 512);
+
+    // Render scene
+    GLfloat vertices[] = {
+        0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f,
+    };
+    glUseProgram(program);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+    glEnableVertexAttribArray(0);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+}

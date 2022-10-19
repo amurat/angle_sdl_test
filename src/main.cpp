@@ -2,8 +2,11 @@
 
 #include <iostream>
 
-extern void RunGLES2Renderer(SDL_Window *);
-extern void RunGL2Renderer(SDL_Window *);
+extern void SetupGLES2Renderer();
+extern void RenderGLES2Renderer();
+
+extern void SetupGL2Renderer();
+extern void RenderGL2Renderer();
 
 int main(int, char**) {
   // Init SDL
@@ -22,7 +25,7 @@ int main(int, char**) {
     
   // Create window
   const bool bInitGLES = true;
-  const bool bRenderGLES = false;
+  const bool bRenderGLES = true;
 
   if (bInitGLES) {
       SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
@@ -50,10 +53,32 @@ int main(int, char**) {
   auto glContext = SDL_GL_CreateContext(window);
   SDL_GL_MakeCurrent(window, glContext);
   if (bRenderGLES) {
-    RunGLES2Renderer(window);
+      SetupGLES2Renderer();
   } else {
-    RunGL2Renderer(window);
+      SetupGL2Renderer();
   }
+    
+    // Main loop
+    bool isRunning = true;
+    while (isRunning) {
+        SDL_Event event;
+        while (0 != SDL_PollEvent(&event)) {
+            if (SDL_QUIT == event.type) {
+                isRunning = false;
+            } else if (SDL_KEYDOWN == event.type) {
+                const auto keyStates_p = SDL_GetKeyboardState(nullptr);
+                if (keyStates_p[SDL_SCANCODE_ESCAPE]) {
+                    isRunning = false;
+                }
+            }
+        }
+        if (bRenderGLES) {
+            RenderGLES2Renderer();
+        } else {
+            RenderGL2Renderer();
+        }
+        SDL_GL_SwapWindow(window);
+    }
 
     // Clean up
   SDL_GL_DeleteContext(glContext);
