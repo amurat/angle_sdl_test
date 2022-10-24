@@ -13,7 +13,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(sdl_CMAKE_ARGS "${sdl_CMAKE_ARGS}" -DFORCE_STATIC_VCRT=ON -DHAVE_LIBC=ON)
 endif()
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(sdl_CMAKE_ARGS "${sdl_CMAKE_ARGS}" -D__MACOSX__=ON)
+    set(sdl_CMAKE_ARGS "${sdl_CMAKE_ARGS}" -DHAVE_DLOPEN_=ON)
 endif()
         
 set(sdl_URL https://www.libsdl.org/release/SDL2-2.24.1.zip)
@@ -25,6 +25,7 @@ ExternalProject_Add(SDL
     URL ${sdl_URL}
     INSTALL_DIR ${sdl_INSTALL_DIR}
     CMAKE_ARGS ${sdl_CMAKE_ARGS}
+    PATCH_COMMAND patch -p1 < ${PROJECT_SOURCE_DIR}/sdl.patch
 )
 
 include_directories(
@@ -44,6 +45,8 @@ set(OSX_FRAMEWORKS
     ForceFeedback
     Carbon
     Metal
+    GameController
+    CoreHaptics
 )
 
 
@@ -53,8 +56,22 @@ endforeach()
 
 
 # Sources
-set(SOURCE_FILES src/main.cpp src/rendergles2.cpp src/rendergl2.cpp
-    vendor/galogen/gl.c)
+set(SOURCE_FILES
+    src/main.cpp
+    src/rendergles2.cpp
+    src/rendergl2.cpp
+    src/eglsetup.cpp
+    src/macwindow.mm
+    src/macwindow.h
+    vendor/galogen/gl.c
+    vendor/glad/src/glad_egl.c
+    vendor/glad/include/glad/glad_egl.h
+)
+
+
+include_directories(
+    ${PROJECT_SOURCE_DIR}/vendor/glad/include
+)
 
 # Dependencies
 if(WIN32)
