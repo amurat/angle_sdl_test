@@ -2,6 +2,7 @@
 #include <SDL_syswm.h>
 
 #include <iostream>
+#include <assert.h>
 
 #include "macwindow.h"
 
@@ -70,10 +71,19 @@ int main(int, char**) {
         SDL_VERSION(&info.version); /* initialize info structure with SDL version info */
 
         if (SDL_GetWindowWMInfo(window, &info)) {
+#ifdef __APPLE__
             if (SDL_SYSWM_COCOA == info.subsystem) {
                 nativeWindowHandle = GetNativeWindowHandle(info.info.cocoa.window);
                 std::cout << "Cocoa\n";
             }
+#endif
+
+#ifdef __LINUX__
+            if (SDL_SYSWM_X11 == info.subsystem) {
+                nativeWindowHandle = (void*)info.info.x11.window;
+                std::cout << "X11\n";
+            }
+#endif
         }
         
         if (!SetupEGL(nativeWindowHandle)) {
