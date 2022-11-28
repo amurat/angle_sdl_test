@@ -58,9 +58,11 @@ endif()
 # Sources
 set(SOURCE_FILES
     src/main.cpp
+    src/rendergl.h
     src/rendergles2.cpp
     src/rendergl2.cpp
-    src/eglsetup.cpp
+    src/glescontext.cpp
+    src/glescontext.h
     vendor/galogen/gl.c
     vendor/glad/src/glad_egl.c
     vendor/glad/include/glad/glad_egl.h

@@ -1,6 +1,9 @@
+
+#include "rendergl.h"
+
 #include <iostream>
-#include <SDL.h>
 #include "angle_gl.h"
+
 
 namespace {
 void printProgramLog(GLuint f_programId) {
@@ -117,4 +120,16 @@ void RenderGLES2Renderer(int w, int h)
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertices);
       glEnableVertexAttribArray(0);
       glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+void
+RenderGLES2::setup()
+{
+    SetupGLES2Renderer();
+}
+
+void
+RenderGLES2::render(int w, int h)
+{
+    RenderGLES2Renderer(w, h);
 }
