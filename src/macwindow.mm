@@ -9,3 +9,19 @@ void* GetNativeWindowHandle(void *window)
     return (__bridge void *)[v layer];
 
 }
+
+void GetWindowDrawableSize(void *window, int* w, int* h)
+{
+    NSWindow* nsw = (NSWindow*)window;
+    NSView* contentView = nsw.contentView;
+    NSRect viewport = [contentView bounds];
+    viewport = [contentView convertRectToBacking:viewport];
+
+    if (w) {
+        *w = viewport.size.width;
+    }
+
+    if (h) {
+        *h = viewport.size.height;
+    }
+}

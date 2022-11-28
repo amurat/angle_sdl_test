@@ -7,10 +7,10 @@
 #include "macwindow.h"
 
 extern void SetupGLES2Renderer();
-extern void RenderGLES2Renderer();
+extern void RenderGLES2Renderer(int w, int h);
 
 extern void SetupGL2Renderer();
-extern void RenderGL2Renderer();
+extern void RenderGL2Renderer(int w, int h);
 
 extern bool SetupEGL(void* nativeWindowHandle);
 extern void EndEGLFrame();
@@ -34,7 +34,7 @@ int main(int, char**) {
   const bool bUseGLSDL = false;
   const bool bInitGLES = true;
   const bool bRenderGLES = true;
-
+    
     if (bUseGLSDL) {
           if (bInitGLES) {
               SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
@@ -61,8 +61,10 @@ int main(int, char**) {
       windowFlags = (SDL_WindowFlags)(SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
   }
     
+  int width = 512;
+  int height = 512;
   auto window = SDL_CreateWindow("Test", SDL_WINDOWPOS_CENTERED,
-                                 SDL_WINDOWPOS_CENTERED, 512, 512, windowFlags);
+                                 SDL_WINDOWPOS_CENTERED, width, height, windowFlags);
     
     if (true) { //(!bUseGLSDL) {
         void* nativeWindowHandle = 0;
@@ -75,6 +77,8 @@ int main(int, char**) {
             if (SDL_SYSWM_COCOA == info.subsystem) {
                 nativeWindowHandle = GetNativeWindowHandle(info.info.cocoa.window);
                 std::cout << "Cocoa\n";
+                GetWindowDrawableSize(info.info.cocoa.window, &width, &height);
+                std::cout << "w : " << width << " h : " << height << std::endl;
             }
 #endif
 
@@ -116,9 +120,9 @@ int main(int, char**) {
             }
         }
         if (bRenderGLES) {
-            RenderGLES2Renderer();
+            RenderGLES2Renderer(width, height);
         } else {
-            RenderGL2Renderer();
+            RenderGL2Renderer(width, height);
         }
         EndEGLFrame();
     }
