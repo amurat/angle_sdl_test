@@ -102,12 +102,12 @@ void SetupGLES2Renderer()
     program = loadProgram(kVS, kFS);
 }
 
-void RenderGLES2Renderer()
+void RenderGLES2Renderer(int w, int h)
 {
       // Clear
       glClearColor(0.2F, 0.2F, 0.2F, 1.F);
       glClear(GL_COLOR_BUFFER_BIT);
-      glViewport(0, 0, 512, 512);
+      glViewport(0, 0, w, h);
 
       // Render scene
       GLfloat vertices[] = {

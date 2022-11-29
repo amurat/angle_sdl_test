@@ -2,14 +2,15 @@
 #include <SDL_syswm.h>
 
 #include <iostream>
+#include <assert.h>
 
 #include "macwindow.h"
 
 extern void SetupGLES2Renderer();
-extern void RenderGLES2Renderer();
+extern void RenderGLES2Renderer(int w, int h);
 
 extern void SetupGL2Renderer();
-extern void RenderGL2Renderer();
+extern void RenderGL2Renderer(int w, int h);
 
 extern bool SetupEGL(void* nativeWindowHandle);
 extern void EndEGLFrame();
@@ -46,7 +47,7 @@ int main(int, char**) {
       SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 =======
   const bool bRenderGLES = true;
-
+    
     if (bUseGLSDL) {
           if (bInitGLES) {
               SDL_SetHint(SDL_HINT_OPENGL_ES_DRIVER, "1");
@@ -74,8 +75,10 @@ int main(int, char**) {
 >>>>>>> db79eff8230b7be00f010effc90986398b2de420
   }
     
+  int width = 512;
+  int height = 512;
   auto window = SDL_CreateWindow("Test", SDL_WINDOWPOS_CENTERED,
-                                 SDL_WINDOWPOS_CENTERED, 512, 512, windowFlags);
+                                 SDL_WINDOWPOS_CENTERED, width, height, windowFlags);
     
     if (true) { //(!bUseGLSDL) {
         void* nativeWindowHandle = 0;
@@ -84,10 +87,21 @@ int main(int, char**) {
         SDL_VERSION(&info.version); /* initialize info structure with SDL version info */
 
         if (SDL_GetWindowWMInfo(window, &info)) {
+#ifdef __APPLE__
             if (SDL_SYSWM_COCOA == info.subsystem) {
                 nativeWindowHandle = GetNativeWindowHandle(info.info.cocoa.window);
                 std::cout << "Cocoa\n";
+                GetWindowDrawableSize(info.info.cocoa.window, &width, &height);
+                std::cout << "w : " << width << " h : " << height << std::endl;
             }
+#endif
+
+#ifdef __LINUX__
+            if (SDL_SYSWM_X11 == info.subsystem) {
+                nativeWindowHandle = (void*)info.info.x11.window;
+                std::cout << "X11\n";
+            }
+#endif
         }
         
         if (!SetupEGL(nativeWindowHandle)) {
@@ -128,9 +142,9 @@ int main(int, char**) {
             }
         }
         if (bRenderGLES) {
-            RenderGLES2Renderer();
+            RenderGLES2Renderer(width, height);
         } else {
-            RenderGL2Renderer();
+            RenderGL2Renderer(width, height);
         }
         EndEGLFrame();
     }

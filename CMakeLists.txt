@@ -33,27 +33,27 @@ include_directories(
 )
 link_directories("${CMAKE_BINARY_DIR}/sdl/lib")
 
-set(OSX_FRAMEWORKS
-    Foundation
-    AppKit
-    ApplicationServices
-    CoreVideo
-    CoreAudio
-    AudioToolbox
-    AudioUnit
-    IOKit
-    ForceFeedback
-    Carbon
-    Metal
-    GameController
-    CoreHaptics
-)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(OSX_FRAMEWORKS
+        Foundation
+        AppKit
+        ApplicationServices
+        CoreVideo
+        CoreAudio
+        AudioToolbox
+        AudioUnit
+        IOKit
+        ForceFeedback
+        Carbon
+        Metal
+        GameController
+        CoreHaptics
+    )
 
-
-foreach(FW ${OSX_FRAMEWORKS})
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework ${FW}")
-endforeach()
-
+    foreach(FW ${OSX_FRAMEWORKS})
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework ${FW}")
+    endforeach()
+endif()
 
 # Sources
 set(SOURCE_FILES
@@ -61,13 +61,18 @@ set(SOURCE_FILES
     src/rendergles2.cpp
     src/rendergl2.cpp
     src/eglsetup.cpp
-    src/macwindow.mm
-    src/macwindow.h
     vendor/galogen/gl.c
     vendor/glad/src/glad_egl.c
     vendor/glad/include/glad/glad_egl.h
 )
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(SOURCE_FILES 
+        src/macwindow.mm
+        src/macwindow.h
+        ${SOURCE_FILES}
+    )
+endif()
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/vendor/glad/include
@@ -95,6 +100,13 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   endif()
 endif()
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    set(EGL_LIBRARY "${PROJECT_SOURCE_DIR}/lib/linux/angle/libEGL.so")
+    set(GLESV2_LIBRARY "${PROJECT_SOURCE_DIR}/lib/linux/angle/libGLESv2.so")
+    set(GL4ES_LIBRARY "${PROJECT_SOURCE_DIR}/lib/linux/gl4es/libGL.so")
+endif()
+
+
 # Executable
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
@@ -118,7 +130,14 @@ target_link_libraries(${PROJECT_NAME}
 #)
 
 target_link_libraries(${PROJECT_NAME} debug SDL2d optimized SDL2)
-target_link_libraries(${PROJECT_NAME} iconv)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_libraries(${PROJECT_NAME} iconv)
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    target_link_libraries(${PROJECT_NAME} GL)
+endif()
 
 add_dependencies(${PROJECT_NAME} SDL)
 
@@ -129,7 +148,8 @@ if(WIN32)
         "${PROJECT_SOURCE_DIR}/lib/win64/angle/libGLESv2.dll"
         "${PROJECT_SOURCE_DIR}/lib/win64/sdl2/SDL2.dll"
         $<TARGET_FILE_DIR:${PROJECT_NAME}>)
-else()
+endif()
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${EGL_LIBRARY}"
         "${GLESV2_LIBRARY}"
@@ -137,5 +157,13 @@ else()
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${GL4ES_LIBRARY}"
         $<TARGET_FILE_DIR:${PROJECT_NAME}>/libGL4ES.dylib)
-
+endif()
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${EGL_LIBRARY}"
+        "${GLESV2_LIBRARY}"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+    #add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    #    "${GL4ES_LIBRARY}"
+    #    $<TARGET_FILE_DIR:${PROJECT_NAME}>/libGL4ES.so)
 endif()
